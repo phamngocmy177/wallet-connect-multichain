@@ -1,3 +1,4 @@
+'use client'
 import ContextProvider  from "./wallet/reown/context-provider";
 import WalletButton from "./components/WalletButton";
 

@@ -6,6 +6,7 @@ import { useWalletList } from '../../wallet/wallet-list';
 import { useConnect } from 'wagmi';
 import { useWallet } from '@tronweb3/tronwallet-adapter-react-hooks';
 import { TronLinkAdapterName } from '@tronweb3/tronwallet-adapters';
+import useWalletStore from '@/app/stores/wallet-store';
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -15,25 +16,36 @@ interface WalletModalProps {
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   const { connectAsync } = useConnect();
-  const { wallets, wallet: tronWallet, disconnect, select, connect: tronConnect } = useWallet();
+  const { wallet: tronWallet, disconnect, select, connect: tronConnect } = useWallet();
   const connectors = useWalletList();
   const { connect , data} = useAppKitWallet();
+  const { connectWallet } = useWalletStore();
   const handleConnect = async (connector: any) => {
     connector.connector.disconnect()
-    if(connector.id === "TronLink") {
-        console.log(connector.connector, tronWallet);
-        // select(connector.connector.name);
+    if(connector.type === "tron") {
         select(TronLinkAdapterName)
-        // await connector.connector.connect()
-        tronConnect()
-        // connect('TronLink')
-        // return;
-    }
-    if(connector.id === "walletConnect") {
-        connect('walletConnect')
+        await tronConnect();
+        connectWallet({
+            id: connector.id,
+            address: tronWallet?.adapter.address || '',
+            network: 'tron',
+            connector: connector.connector
+        })
         return;
     }
-    await connectAsync({ connector });
+    if(connector.type === "evm") {
+        // await connect('metamask');
+        const connectedAccount = await connectAsync({ connector: connector.connector });
+        if(connectedAccount) {
+            connectWallet({
+                id: connector.id,
+                address: connectedAccount?.accounts?.[0] || '',
+                network: connectedAccount?.chainId || '',
+                connector: connector.connector
+            })
+        }
+        return;
+    }
   }
   console.log(data);
   return (
@@ -58,7 +70,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Wallet Options */}
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-4 justify-start items-center'>
         {connectors.map((connector) => (
           <button key={connector.id} onClick={() => handleConnect(connector)}>
             {connector.name}

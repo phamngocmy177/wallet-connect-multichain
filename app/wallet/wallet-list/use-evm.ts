@@ -1,4 +1,5 @@
 import { useConnectors} from 'wagmi'
+import { useAppKitWallet } from "@reown/appkit-wallet-button/react";
 
 export const useEvmConnectors = () => {
     const connectors = useConnectors()
@@ -6,7 +7,8 @@ export const useEvmConnectors = () => {
         id: connector.id,
         name: connector.name,
         icon: connector.icon,
-        connector: connector
+        connector: connector,
+        type: 'evm'
     }))
     return connectorsList
 }
