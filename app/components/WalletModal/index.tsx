@@ -7,6 +7,7 @@ import { useConnect } from 'wagmi';
 import { useWallet } from '@tronweb3/tronwallet-adapter-react-hooks';
 import { TronLinkAdapterName } from '@tronweb3/tronwallet-adapters';
 import useWalletStore from '@/app/stores/wallet-store';
+import { useAppKitAccount } from '@reown/appkit/react';
 
 interface WalletModalProps {
     isOpen: boolean;
@@ -14,12 +15,20 @@ interface WalletModalProps {
 }
 
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
-    if (!isOpen) return null;
     const { connectAsync } = useConnect();
     const { wallet: tronWallet, disconnect, select, connect: tronConnect } = useWallet();
     const connectors = useWalletList();
+
+const eip155Account = useAppKitAccount({ namespace: "eip155" }); // for EVM chains
+const solanaAccount = useAppKitAccount({ namespace: "solana" });
+const bip122Account = useAppKitAccount({ namespace: "bip122" }); // for bitcoin
+console.log('eip155Account', eip155Account)
+console.log('solanaAccount', solanaAccount)
+console.log('bip122Account', bip122Account)
     const { connect, data } = useAppKitWallet();
+    console.log('data', data)
     const { connectWallet } = useWalletStore();
+    if (!isOpen) return null;
     const handleConnect = async (connector: any) => {
         connector.connector.disconnect()
         if (connector.type === "tron") {
@@ -34,16 +43,24 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
             return;
         }
         if (connector.type === "evm") {
-            // await connect('metamask');
-            const connectedAccount = await connectAsync({ connector: connector.connector });
-            if (connectedAccount) {
-                connectWallet({
-                    id: connector.id,
-                    address: connectedAccount?.accounts?.[0] || '',
-                    network: connectedAccount?.chainId || '',
-                    connector: connector.connector
-                })
-            }
+            await connect('phantom');
+            // if(data) {
+            //     connectWallet({
+            //         id: connector.id,
+            //         address: data.address,
+            //         network: data.chainId,
+            //         connector: connector.connector
+            //     })
+            // }
+            // const connectedAccount = await connectAsync({ connector: connector.connector });
+            // if (connectedAccount) {
+            //     connectWallet({
+            //         id: connector.id,
+            //         address: connectedAccount?.accounts?.[0] || '',
+            //         network: connectedAccount?.chainId || '',
+            //         connector: connector.connector
+            //     })
+            // }
             return;
         }
     }
@@ -68,7 +85,6 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
                         ✕
                     </button>
                 </div>
-
                 {/* Wallet Options */}
                 <div className='flex flex-col gap-4 justify-start items-center'>
                     {connectors.map((connector) => (
