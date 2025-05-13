@@ -2,7 +2,7 @@
 
 import { wagmiAdapter, projectId } from './config'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createAppKit } from '@reown/appkit/react'
+import { createAppKit, Provider } from '@reown/appkit/react'
 import { 
   mainnet, 
   arbitrum,
@@ -65,7 +65,7 @@ createAppKit({
     analytics: true // Optional - defaults to your Cloud configuration
   }
 })
-
+// modal.setD
   const onError = (error: Error) => { 
     console.error('error', error);
   }

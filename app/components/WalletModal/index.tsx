@@ -1,24 +1,24 @@
 'use client'
 
 import React from 'react';
-import { useAppKitWallet } from "@reown/appkit-wallet-button/react";
-import { useWalletList } from '../../wallet/wallet-list';
+import { useAppKitWallet, createAppKitWalletButton, Wallet } from "@reown/appkit-wallet-button/react";
+import { useWalletList, } from '../../wallet/wallet-list';
 import { useConnect } from 'wagmi';
 import { useWallet } from '@tronweb3/tronwallet-adapter-react-hooks';
 import { TronLinkAdapterName } from '@tronweb3/tronwallet-adapters';
 import useWalletStore from '@/app/stores/wallet-store';
-import { useAppKitAccount } from '@reown/appkit/react';
-
+import { useAppKitAccount, useWalletInfo } from '@reown/appkit/react';
+import SolanaWalletButtons from './SolanaWalletButtons';
+import EVMWalletButtons from './EVMWalletButtons';
 interface WalletModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
-    const { connectAsync } = useConnect();
-    const { wallet: tronWallet, disconnect, select, connect: tronConnect } = useWallet();
-    const connectors = useWalletList();
-
+    // const { wallet: tronWallet, disconnect, select, connect: tronConnect } = useWallet();
+    // const { walletInfo } = useWalletInfo()
+    // console.log('walletInfo', walletInfo)
 const eip155Account = useAppKitAccount({ namespace: "eip155" }); // for EVM chains
 const solanaAccount = useAppKitAccount({ namespace: "solana" });
 const bip122Account = useAppKitAccount({ namespace: "bip122" }); // for bitcoin
@@ -32,26 +32,26 @@ console.log('bip122Account', bip122Account)
     const handleConnect = async (connector: any) => {
         connector.connector.disconnect()
         if (connector.type === "tron") {
-            select(TronLinkAdapterName)
-            await tronConnect();
-            connectWallet({
-                id: connector.id,
-                address: tronWallet?.adapter.address || '',
-                network: 'tron',
-                connector: connector.connector
-            })
+            // select(TronLinkAdapterName)
+            // await tronConnect();
+            // connectWallet({
+            //     id: connector.id,
+            //     address: tronWallet?.adapter.address || '',
+            //     network: 'tron',
+            //     connector: connector.connector
+            // })
             return;
         }
         if (connector.type === "evm") {
-            await connect('phantom');
-            // if(data) {
-            //     connectWallet({
-            //         id: connector.id,
-            //         address: data.address,
-            //         network: data.chainId,
-            //         connector: connector.connector
-            //     })
-            // }
+            await connect('metamask');
+            if(data) {
+                connectWallet({
+                    id: connector.id,
+                    address: data.address,
+                    network: data.chainId,
+                    connector: connector.connector
+                })
+            }
             // const connectedAccount = await connectAsync({ connector: connector.connector });
             // if (connectedAccount) {
             //     connectWallet({
@@ -85,8 +85,11 @@ console.log('bip122Account', bip122Account)
                         ✕
                     </button>
                 </div>
+                {/* <SolanaWalletButtons /> */}
+                <EVMWalletButtons />
+                {/* <appkit-wallet-button wallet="phantom" /> */}
                 {/* Wallet Options */}
-                <div className='flex flex-col gap-4 justify-start items-center'>
+                {/* <div className='flex flex-col gap-4 justify-start items-center'>
                     {connectors.map((connector) => (
                         <button key={connector.id} onClick={() => handleConnect(connector)}
                             className='flex flex-row gap-2 justify-between items-center w-full'
@@ -100,7 +103,7 @@ console.log('bip122Account', bip122Account)
                             <span className='text-sm'>{connector.name}</span>
                         </button>
                     ))}
-                </div>
+                </div> */}
             </div>
         </div>
     );
